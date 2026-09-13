@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 日志
+*.log
+
+# 运行期/临时状态，不入库
+results/_mock/
+results/_mock2/
+results/live/
+results/live_demo/
+tmp/
+.tmp/
+
+# 编辑器/系统
+.DS_Store
+.vscode/
+.idea/

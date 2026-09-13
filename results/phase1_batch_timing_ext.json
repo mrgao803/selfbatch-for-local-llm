@@ -1,0 +1,70 @@
+{
+  "model": "qwen38-27b（bf16, vLLM）",
+  "gpu": "NVIDIA GB10（统一内存，总 119 GiB）",
+  "context_tokens": 2048,
+  "output_tokens": 256,
+  "sampling": "greedy(temperature=0), ignore_eos=true, enable_thinking=false",
+  "measured_at": "2026-09-13T10:14:27.161062",
+  "filler_tokens": 1973,
+  "templated_prompt_tokens": 2048,
+  "measurements": [
+    {
+      "batch": 32,
+      "prefill_ms_median": 7139.3,
+      "decode_ms_median": 84292.9,
+      "decode_ms_p90": 84827.8,
+      "tokens_per_sec": 3.04,
+      "raw_decode_ms": [
+        83928.9,
+        84292.9,
+        84827.8,
+        84458.2,
+        83983.5
+      ],
+      "raw_prefill_ms": [
+        7139.3,
+        7128.1,
+        7130.2,
+        7141.2,
+        7139.5
+      ],
+      "output_tokens_per_request": 256,
+      "wall_ms": [
+        87094.5,
+        87444.2,
+        87987.4,
+        87621.9,
+        87152.8
+      ]
+    },
+    {
+      "batch": 64,
+      "prefill_ms_median": 13483.3,
+      "decode_ms_median": 108193.5,
+      "decode_ms_p90": 108910.2,
+      "tokens_per_sec": 2.37,
+      "raw_decode_ms": [
+        108193.5,
+        108910.2,
+        108271.3,
+        107998.4,
+        107205.2
+      ],
+      "raw_prefill_ms": [
+        13576.2,
+        13569.1,
+        13483.3,
+        13241.6,
+        13271.8
+      ],
+      "output_tokens_per_request": 256,
+      "wall_ms": [
+        113955.2,
+        114680.0,
+        114040.7,
+        113774.1,
+        113074.0
+      ]
+    }
+  ]
+}

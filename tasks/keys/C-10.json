@@ -1,0 +1,139 @@
+{
+  "task_id": "C-10",
+  "chain_length": 12,
+  "steps": [
+    {
+      "step": 1,
+      "outputs": {
+        "Q1": 520.0,
+        "P1": 1.2
+      },
+      "uses_previous": []
+    },
+    {
+      "step": 2,
+      "outputs": {
+        "Q2": 488.8,
+        "P2": 1.128
+      },
+      "uses_previous": [
+        "Q1",
+        "P1"
+      ]
+    },
+    {
+      "step": 3,
+      "outputs": {
+        "Q3": 444.81,
+        "P3": 1.059
+      },
+      "uses_previous": [
+        "Q2",
+        "P2"
+      ]
+    },
+    {
+      "step": 4,
+      "outputs": {
+        "Q4": 391.43,
+        "P4": 0.998
+      },
+      "uses_previous": [
+        "Q3",
+        "P3"
+      ]
+    },
+    {
+      "step": 5,
+      "outputs": {
+        "Q5": 332.72,
+        "P5": 0.948
+      },
+      "uses_previous": [
+        "Q4",
+        "P4"
+      ]
+    },
+    {
+      "step": 6,
+      "outputs": {
+        "Q6": 299.45,
+        "P6": 0.921
+      },
+      "uses_previous": [
+        "Q5",
+        "P5"
+      ]
+    },
+    {
+      "step": 7,
+      "outputs": {
+        "Q7": 260.52,
+        "P7": 0.895
+      },
+      "uses_previous": [
+        "Q6",
+        "P6"
+      ]
+    },
+    {
+      "step": 8,
+      "outputs": {
+        "Q8": 242.28,
+        "P8": 0.879
+      },
+      "uses_previous": [
+        "Q7",
+        "P7"
+      ]
+    },
+    {
+      "step": 9,
+      "outputs": {
+        "Q9": 215.63,
+        "P9": 0.859
+      },
+      "uses_previous": [
+        "Q8",
+        "P8"
+      ]
+    },
+    {
+      "step": 10,
+      "outputs": {
+        "Q10": 198.38,
+        "P10": 0.846
+      },
+      "uses_previous": [
+        "Q9",
+        "P9"
+      ]
+    },
+    {
+      "step": 11,
+      "outputs": {
+        "Q11": 170.61,
+        "P11": 0.832
+      },
+      "uses_previous": [
+        "Q10",
+        "P10"
+      ]
+    },
+    {
+      "step": 12,
+      "outputs": {
+        "Q12": 162.08,
+        "P12": 0.825
+      },
+      "uses_previous": [
+        "Q11",
+        "P11"
+      ]
+    }
+  ],
+  "final": {
+    "Q12": 162.08,
+    "P12": 0.825
+  }
+}

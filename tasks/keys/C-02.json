@@ -1,0 +1,112 @@
+{
+  "task_id": "C-02",
+  "chain_length": 8,
+  "steps": [
+    {
+      "step": 1,
+      "inputs": {
+        "P0": 0.2
+      },
+      "outputs": {
+        "A1": 2.25,
+        "P1": 0.45
+      },
+      "uses_previous": []
+    },
+    {
+      "step": 2,
+      "inputs": {
+        "P1": 0.45
+      },
+      "outputs": {
+        "A2": 1.9775,
+        "P2": 0.8899
+      },
+      "uses_previous": [
+        "P1"
+      ]
+    },
+    {
+      "step": 3,
+      "inputs": {
+        "P2": 0.8899
+      },
+      "outputs": {
+        "A3": 1.6129,
+        "P3": 1.4353
+      },
+      "uses_previous": [
+        "P2"
+      ]
+    },
+    {
+      "step": 4,
+      "inputs": {
+        "P3": 1.4353
+      },
+      "outputs": {
+        "A4": 2.0981,
+        "P4": 3.0114
+      },
+      "uses_previous": [
+        "P3"
+      ]
+    },
+    {
+      "step": 5,
+      "inputs": {
+        "P4": 3.0114
+      },
+      "outputs": {
+        "A5": 1.2586,
+        "P5": 3.7901
+      },
+      "uses_previous": [
+        "P4"
+      ]
+    },
+    {
+      "step": 6,
+      "inputs": {
+        "P5": 3.7901
+      },
+      "outputs": {
+        "A6": 1.6963,
+        "P6": 6.4291
+      },
+      "uses_previous": [
+        "P5"
+      ]
+    },
+    {
+      "step": 7,
+      "inputs": {
+        "P6": 6.4291
+      },
+      "outputs": {
+        "A7": 1.1666,
+        "P7": 7.5002
+      },
+      "uses_previous": [
+        "P6"
+      ]
+    },
+    {
+      "step": 8,
+      "inputs": {
+        "P7": 7.5002
+      },
+      "outputs": {
+        "A8": 1.3143,
+        "P8": 9.8575
+      },
+      "uses_previous": [
+        "P7"
+      ]
+    }
+  ],
+  "final": {
+    "P8": 9.8575,
+    "T": 49.2875
+  }
+}

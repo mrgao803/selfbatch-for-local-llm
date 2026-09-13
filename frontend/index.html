@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>多段并行生成 · 实时视图</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#151b23; --panel2:#1b232d; --border:#2a3441;
+    --fg:#e6edf3; --muted:#8b98a5; --dim:#6b7682;
+    --accent:#58a6ff; --writing:#f0b429; --done:#3fb950; --idle:#6b7682;
+    --reason-bg:#070a0e; --reason-fg:#c9a24a; --reason-border:#8a6d2f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--fg); min-height:100vh;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB",
+                "Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    font-size:14px; line-height:1.6;
+  }
+  .hidden{display:none !important}
+
+  /* ---------- 顶栏 ---------- */
+  #topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    padding:12px 18px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#121820,#0d1218); position:sticky; top:0; z-index:20;
+  }
+  .brand{display:flex; align-items:center; gap:9px; font-weight:600; letter-spacing:.3px}
+  .brand .logo{color:var(--accent); font-size:17px}
+  .toggle{display:flex; align-items:center; gap:7px; color:var(--muted);
+    cursor:pointer; user-select:none; font-size:13px;
+    border:1px solid var(--border); border-radius:999px; padding:5px 13px; background:var(--panel)}
+  .toggle:hover{color:var(--fg); border-color:#3b4a5c}
+  .toggle input{accent-color:var(--accent); width:15px; height:15px; cursor:pointer}
+
+  /* ---------- 信息条 ---------- */
+  #infobar{
+    display:flex; flex-wrap:wrap; gap:8px 10px; align-items:center;
+    padding:11px 18px; background:var(--panel); border-bottom:1px solid var(--border);
+  }
+  .field{
+    display:flex; align-items:baseline; gap:6px;
+    background:var(--panel2); border:1px solid var(--border);
+    border-radius:7px; padding:3px 10px; white-space:nowrap;
+  }
+  .field .k{color:var(--dim); font-size:11px}
+  .field .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12.5px; color:var(--fg)}
+  .field.phase{border-color:#3b4a5c; background:#1d2733}
+  .field.phase .v{color:var(--accent)}
+
+  /* ---------- 阶段条 ---------- */
+  #stagebar{
+    display:flex; flex-wrap:wrap; align-items:center; gap:12px;
+    padding:12px 18px; border-bottom:1px solid var(--border);
+  }
+  .stage-badge{
+    font-weight:700; letter-spacing:.4px; padding:4px 13px; border-radius:999px;
+    border:1px solid currentColor; font-size:13px;
+  }
+  .stage-badge.s-a0{color:#a371f7}
+  .stage-badge.s-a1{color:var(--accent)}
+  .stage-badge.s-a2{color:#39c5cf}
+  .stage-desc{color:var(--muted); font-size:12.5px}
+  .stage-progress{margin-left:auto; display:flex; align-items:center; gap:9px; color:var(--muted); font-size:12.5px}
+  .bar{width:130px; height:7px; border-radius:4px; background:#202a36; overflow:hidden}
+  .bar > i{display:block; height:100%; width:0; background:var(--done); transition:width .25s ease}
+  .stage-clock{color:var(--dim); font-family:ui-monospace,Menlo,monospace; font-size:11.5px}
+
+  /* ---------- 卡片网格 ---------- */
+  #grid{
+    display:grid; gap:14px; padding:16px 18px 40px;
+    grid-template-columns:repeat(var(--cols,1),minmax(0,1fr));
+    align-items:stretch;
+  }
+  #grid.one{grid-template-columns:minmax(0,960px); justify-content:center}
+  .card{
+    position:relative; display:flex; flex-direction:column; min-width:0;
+    background:var(--panel); border:1px solid var(--border); border-radius:11px;
+    padding:12px 13px 11px; overflow:hidden;
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .card::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background:var(--c,var(--accent)); opacity:.85;
+  }
+  .card.writing{border-color:#4a3c14; box-shadow:0 0 0 1px rgba(240,180,41,.10),0 6px 22px rgba(0,0,0,.35)}
+  .card.done{border-color:#20402c}
+  .card-head{display:flex; align-items:center; gap:8px; margin-bottom:8px}
+  .badge{
+    flex:none; font-family:ui-monospace,Menlo,monospace; font-size:11px; font-weight:700;
+    color:var(--c,var(--accent)); border:1px solid currentColor; border-radius:6px; padding:1px 7px;
+  }
+  .title{
+    flex:1 1 auto; min-width:0; font-weight:600; font-size:13.5px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .state-dot{flex:none; display:flex; align-items:center; gap:5px; font-size:11px; color:var(--muted)}
+  .state-dot b{width:8px; height:8px; border-radius:50%; background:var(--idle); display:inline-block}
+  .card.writing .state-dot b{background:var(--writing); animation:pulse 1s ease-in-out infinite}
+  .card.done .state-dot b{background:var(--done)}
+  @keyframes pulse{0%,100%{opacity:1; transform:scale(1)}50%{opacity:.35; transform:scale(.7)}}
+
+  .card-body{
+    flex:1 1 auto; min-height:52px; max-height:340px; overflow-y:auto;
+    white-space:pre-wrap; word-break:break-word; font-size:13px; color:#d7e0e9;
+  }
+  .card-body:empty::after{content:"…"; color:var(--dim)}
+  .card.writing .card-body::after{
+    content:"▍"; color:var(--writing); animation:blink 1s steps(1) infinite; margin-left:1px;
+  }
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+  /* ---------- 思考内容区（暗色/斜体小字） ---------- */
+  .reason{
+    margin-top:8px; padding:7px 9px 7px 11px; border-radius:7px;
+    background:var(--reason-bg); border-left:3px solid var(--reason-border);
+    color:var(--reason-fg); font-style:italic; font-size:11.5px; line-height:1.5;
+    max-height:130px; overflow-y:auto; white-space:pre-wrap; word-break:break-word;
+  }
+  .reason .reason-tag{
+    font-style:normal; font-weight:700; font-size:10px; letter-spacing:.6px;
+    color:var(--reason-border); margin-right:6px; opacity:.9;
+  }
+  .reason:empty{display:none}
+  body.no-reason .reason{display:none}
+
+  .card-foot{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    margin-top:9px; padding-top:8px; border-top:1px solid var(--border);
+    font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11px; color:var(--muted);
+  }
+  .card-foot .tokens{color:var(--dim)}
+  .card-foot .state-text{color:var(--writing)}
+  .card.done .card-foot .state-text{color:var(--done)}
+
+  /* ---------- 等待态 ---------- */
+  #waiting{display:flex; align-items:center; justify-content:center; min-height:62vh}
+  .waiting-inner{text-align:center; color:var(--muted)}
+  .spinner{
+    width:34px; height:34px; margin:0 auto 16px; border-radius:50%;
+    border:3px solid #24303d; border-top-color:var(--accent); animation:spin 1s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .waiting-title{font-size:16px; color:var(--fg); margin-bottom:6px}
+  .waiting-sub{font-size:12px; color:var(--dim)}
+
+  @media (max-width:1200px){ #grid:not(.one){grid-template-columns:repeat(2,minmax(0,1fr))} }
+  @media (max-width:820px){ #grid:not(.one){grid-template-columns:1fr} }
+</style>
+</head>
+<body class="">
+
+<header id="topbar">
+  <div class="brand"><span class="logo">▦</span><span>多段并行生成 · 实时视图</span></div>
+  <label class="toggle" title="显示 / 隐藏每段的思考内容">
+    <input type="checkbox" id="reason-toggle" checked>
+    <span>显示思考内容</span>
+  </label>
+</header>
+
+<div id="infobar" class="hidden">
+  <div class="field"><span class="k">题号</span><span class="v" id="i-task">—</span></div>
+  <div class="field"><span class="k">类别</span><span class="v" id="i-cls">—</span></div>
+  <div class="field"><span class="k">N</span><span class="v" id="i-n">—</span></div>
+  <div class="field"><span class="k">链长</span><span class="v" id="i-chain">—</span></div>
+  <div class="field"><span class="k">seed</span><span class="v" id="i-seed">—</span></div>
+  <div class="field"><span class="k">条件</span><span class="v" id="i-condition">—</span></div>
+  <div class="field"><span class="k">变体</span><span class="v" id="i-variant">—</span></div>
+  <div class="field"><span class="k">轮次</span><span class="v" id="i-round">—</span></div>
+  <div class="field phase"><span class="k">阶段</span><span class="v" id="i-phase">—</span></div>
+</div>
+
+<div id="stagebar" class="hidden">
+  <span class="stage-badge" id="stage-badge">—</span>
+  <span class="stage-desc" id="stage-desc"></span>
+  <span class="stage-progress">
+    <span id="stage-progress-text">0/0</span>
+    <span class="bar"><i id="stage-progress-bar"></i></span>
+  </span>
+  <span class="stage-clock" id="stage-clock"></span>
+</div>
+
+<main id="grid" class="hidden"></main>
+
+<div id="waiting">
+  <div class="waiting-inner">
+    <div class="spinner"></div>
+    <div class="waiting-title">等待运行器启动…</div>
+    <div class="waiting-sub">未找到 state.json，或文件正在写入</div>
+  </div>
+</div>
+
+<template id="card-tpl">
+  <article class="card">
+    <div class="card-head">
+      <span class="badge"></span>
+      <span class="title"></span>
+      <span class="state-dot"><b></b><span class="state-label"></span></span>
+    </div>
+    <div class="reason"><span class="reason-tag">思考</span><span class="reason-text"></span></div>
+    <div class="card-body"></div>
+    <div class="card-foot">
+      <span class="tokens">0 t</span>
+      <span class="state-text">等待</span>
+    </div>
+  </article>
+</template>
+
+<script>
+(function(){
+  "use strict";
+
+  var POLL_MS = 250;
+  var PALETTE = ["#58a6ff","#3fb950","#f0b429","#bc8cff","#39c5cf","#ff7b72",
+                 "#d29922","#56d364","#79c0ff","#f778ba","#a5d6ff","#7ee787"];
+
+  var el = {
+    infobar: document.getElementById("infobar"),
+    stagebar: document.getElementById("stagebar"),
+    grid: document.getElementById("grid"),
+    waiting: document.getElementById("waiting"),
+    tpl: document.getElementById("card-tpl"),
+    reasonToggle: document.getElementById("reason-toggle"),
+    task: document.getElementById("i-task"),
+    cls: document.getElementById("i-cls"),
+    n: document.getElementById("i-n"),
+    chain: document.getElementById("i-chain"),
+    seed: document.getElementById("i-seed"),
+    condition: document.getElementById("i-condition"),
+    variant: document.getElementById("i-variant"),
+    round: document.getElementById("i-round"),
+    phase: document.getElementById("i-phase"),
+    stageBadge: document.getElementById("stage-badge"),
+    stageDesc: document.getElementById("stage-desc"),
+    stageProgressText: document.getElementById("stage-progress-text"),
+    stageProgressBar: document.getElementById("stage-progress-bar"),
+    stageClock: document.getElementById("stage-clock")
+  };
+
+  var cards = {};       // 段号 -> {root, refs}
+  var layoutKey = "";   // 段号集合的签名，用于判断是否需要重建网格
+  var lastState = null;
+
+  function fmt(v){
+    return (v === null || v === undefined || v === "") ? "—" : String(v);
+  }
+
+  function colCount(n){
+    if (n <= 1) return 1;
+    if (n <= 4) return 2;
+    if (n <= 9) return 3;
+    return 4;
+  }
+
+  function stageInfo(st){
+    var c = String(st.condition || "").toUpperCase();
+    if (c.indexOf("A0") === 0){
+      return {text:"A0 · 一次写完（基线）", cls:"s-a0",
+              desc:"单次生成整篇文档 · 单卡展示"};
+    }
+    if (c.indexOf("A1") === 0){
+      return {text:"A1 · N 段并行生成", cls:"s-a1",
+              desc:(st.n || "N") + " 段同时写入，彼此独立"};
+    }
+    if (c.indexOf("A2") === 0){
+      var r = (st.round === 0 || st.round) ? st.round : "k";
+      return {text:"A2 · 第 " + r + " 轮汇总融合", cls:"s-a2",
+              desc:(st.variant ? "变体 " + st.variant + " · " : "") +
+                   (st.n || "N") + " 段互相看见后同时重写"};
+    }
+    return {text: fmt(st.condition), cls:"", desc:""};
+  }
+
+  function stateLabel(s){
+    if (s === "writing") return "写入中";
+    if (s === "done") return "完成";
+    if (s === "pending") return "等待";
+    return fmt(s);
+  }
+
+  function setText(node, text){
+    if (node.__t !== text){ node.__t = text; node.textContent = text; }
+  }
+
+  function buildGrid(segs){
+    el.grid.innerHTML = "";
+    cards = {};
+    var cols = colCount(segs.length);
+    el.grid.style.setProperty("--cols", cols);
+    el.grid.classList.toggle("one", segs.length <= 1);
+    segs.forEach(function(seg, idx){
+      var node = el.tpl.content.firstElementChild.cloneNode(true);
+      node.style.setProperty("--c", PALETTE[idx % PALETTE.length]);
+      el.grid.appendChild(node);
+      cards[seg.i] = {
+        root: node,
+        badge: node.querySelector(".badge"),
+        title: node.querySelector(".title"),
+        stateLabel: node.querySelector(".state-label"),
+        body: node.querySelector(".card-body"),
+        reason: node.querySelector(".reason"),
+        reasonText: node.querySelector(".reason-text"),
+        tokens: node.querySelector(".tokens"),
+        stateText: node.querySelector(".state-text")
+      };
+    });
+  }
+
+  function updateCard(c, seg){
+    setText(c.badge, "段 " + fmt(seg.i));
+    setText(c.title, fmt(seg.title));
+    setText(c.stateLabel, stateLabel(seg.state));
+    setText(c.stateText, stateLabel(seg.state));
+
+    // 走原生 completions 时，模型把思考以字面 <think>…</think> 混在正文里。
+    // 这里只做「显示层」拆分：思考进思考区、正文进正文区。原始文件一个字节都不动。
+    var text = seg.text || "";
+    var reason = seg.reasoning || "";
+    var m = text.match(/<think>([\s\S]*?)<\/think>/);
+    if (m){
+      reason = m[1] + (reason ? "\n" + reason : "");
+      text = text.replace(m[0], "").replace(/^\s+/, "");
+    } else {
+      var open = text.match(/<think>([\s\S]*)$/);
+      if (open){ reason = open[1] + (reason ? "\n" + reason : ""); text = ""; }
+    }
+    if (c.body.__t !== text){
+      c.body.__t = text;
+      c.body.textContent = text;
+      if (seg.state === "writing") c.body.scrollTop = c.body.scrollHeight;
+    }
+    if (c.reason.__t !== reason){
+      c.reason.__t = reason;
+      c.reasonText.textContent = reason;
+      // 没有思考内容时整块隐藏：:empty 不生效，因为 div 里始终有「思考」标签
+      c.reason.style.display = reason ? "" : "none";
+    }
+    setText(c.tokens, ((seg.tokens || 0) | 0) + " t");
+
+    c.root.classList.toggle("writing", seg.state === "writing");
+    c.root.classList.toggle("done", seg.state === "done");
+  }
+
+  function render(st){
+    lastState = st;
+    if (!st || st.empty || !Array.isArray(st.segments) || st.segments.length === 0){
+      el.waiting.classList.remove("hidden");
+      el.infobar.classList.add("hidden");
+      el.stagebar.classList.add("hidden");
+      el.grid.classList.add("hidden");
+      return;
+    }
+    el.waiting.classList.add("hidden");
+    el.infobar.classList.remove("hidden");
+    el.stagebar.classList.remove("hidden");
+    el.grid.classList.remove("hidden");
+
+    var segs = st.segments;
+    setText(el.task, fmt(st.task_id));
+    setText(el.cls, fmt(st.cls));
+    setText(el.n, fmt(st.n));
+    setText(el.chain, fmt(st.chain));
+    setText(el.seed, fmt(st.seed));
+    setText(el.condition, fmt(st.condition));
+    setText(el.variant, fmt(st.variant));
+    setText(el.round, fmt(st.round));
+    setText(el.phase, fmt(st.phase));
+
+    var info = stageInfo(st);
+    setText(el.stageBadge, info.text);
+    el.stageBadge.className = "stage-badge" + (info.cls ? " " + info.cls : "");
+    setText(el.stageDesc, info.desc);
+
+    var done = segs.filter(function(s){ return s.state === "done"; }).length;
+    setText(el.stageProgressText, done + "/" + segs.length + " 完成");
+    el.stageProgressBar.style.width = Math.round(done / segs.length * 100) + "%";
+
+    if (st.updated_at){
+      var age = Math.max(0, Date.now() / 1000 - st.updated_at);
+      var when = new Date(st.updated_at * 1000).toLocaleTimeString("zh-CN", {hour12:false});
+      setText(el.stageClock, when + " · " + age.toFixed(1) + "s 前");
+    } else {
+      setText(el.stageClock, "");
+    }
+
+    var key = segs.map(function(s){ return s.i; }).join(",");
+    if (key !== layoutKey){
+      layoutKey = key;
+      buildGrid(segs);
+    }
+    segs.forEach(function(seg){
+      if (cards[seg.i]) updateCard(cards[seg.i], seg);
+    });
+  }
+
+  async function poll(){
+    var st = null;
+    try {
+      var resp = await fetch("/state", {cache: "no-store"});
+      if (resp.ok) st = await resp.json();
+    } catch (e){
+      st = null;
+    }
+    render(st);
+  }
+
+  el.reasonToggle.addEventListener("change", function(){
+    document.body.classList.toggle("no-reason", !el.reasonToggle.checked);
+    try { localStorage.setItem("docoder.reason", el.reasonToggle.checked ? "1" : "0"); } catch (e){}
+  });
+  try {
+    if (localStorage.getItem("docoder.reason") === "0"){
+      el.reasonToggle.checked = false;
+      document.body.classList.add("no-reason");
+    }
+  } catch (e){}
+
+  poll();
+  setInterval(poll, POLL_MS);
+})();
+</script>
+</body>
+</html>

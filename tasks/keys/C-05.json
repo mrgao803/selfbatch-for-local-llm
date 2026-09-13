@@ -1,0 +1,116 @@
+{
+  "task_id": "C-05",
+  "chain_length": 10,
+  "steps": [
+    {
+      "step": 1,
+      "outputs": {
+        "P1": 676.8
+      },
+      "uses_previous": []
+    },
+    {
+      "step": 2,
+      "outputs": {
+        "ΔT2": 30.46,
+        "T2": 56.46
+      },
+      "uses_previous": [
+        "P1"
+      ]
+    },
+    {
+      "step": 3,
+      "outputs": {
+        "F3": 0.9086,
+        "P3": 614.94
+      },
+      "uses_previous": [
+        "P1",
+        "T2"
+      ]
+    },
+    {
+      "step": 4,
+      "outputs": {
+        "η4": 0.9117,
+        "P4": 560.64,
+        "W4": 54.3
+      },
+      "uses_previous": [
+        "T2",
+        "P3"
+      ]
+    },
+    {
+      "step": 5,
+      "outputs": {
+        "ΔT5": 2.81,
+        "T5": 59.27
+      },
+      "uses_previous": [
+        "W4"
+      ]
+    },
+    {
+      "step": 6,
+      "outputs": {
+        "F6": 0.8902,
+        "P6": 499.08
+      },
+      "uses_previous": [
+        "P4",
+        "T5"
+      ]
+    },
+    {
+      "step": 7,
+      "outputs": {
+        "η7": 0.8967,
+        "P7": 447.53,
+        "W7": 51.55
+      },
+      "uses_previous": [
+        "P6"
+      ]
+    },
+    {
+      "step": 8,
+      "outputs": {
+        "ΔT8": 3.02,
+        "T8": 62.29
+      },
+      "uses_previous": [
+        "W7"
+      ]
+    },
+    {
+      "step": 9,
+      "outputs": {
+        "F9": 0.8694,
+        "P9": 389.08
+      },
+      "uses_previous": [
+        "P7",
+        "T8"
+      ]
+    },
+    {
+      "step": 10,
+      "outputs": {
+        "η10": 0.881,
+        "P10": 342.78,
+        "W10": 46.3,
+        "T10": 64.37
+      },
+      "uses_previous": [
+        "P9",
+        "T8"
+      ]
+    }
+  ],
+  "final": {
+    "P10": 342.78,
+    "T10": 64.37
+  }
+}

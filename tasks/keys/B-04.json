@@ -1,0 +1,52 @@
+{
+  "task_id": "B-04",
+  "chain_length": 4,
+  "steps": [
+    {
+      "step": 1,
+      "outputs": {
+        "E1": 480,
+        "S1": 1400,
+        "T1": 0.33
+      },
+      "uses_previous": []
+    },
+    {
+      "step": 2,
+      "outputs": {
+        "E2": 392,
+        "S2": 1308,
+        "T2": 0.29
+      },
+      "uses_previous": [
+        "S1"
+      ]
+    },
+    {
+      "step": 3,
+      "outputs": {
+        "E3": 458,
+        "S3": 1110,
+        "T3": 0.38
+      },
+      "uses_previous": [
+        "S2"
+      ]
+    },
+    {
+      "step": 4,
+      "outputs": {
+        "E4": 244,
+        "S4": 1106,
+        "T4": 0.22
+      },
+      "uses_previous": [
+        "S3"
+      ]
+    }
+  ],
+  "final": {
+    "S4": 1106,
+    "Etot": 1574
+  }
+}

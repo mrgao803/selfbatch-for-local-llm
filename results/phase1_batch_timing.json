@@ -1,0 +1,165 @@
+{
+  "model": "qwen38-27b（bf16, vLLM）",
+  "gpu": "NVIDIA GB10（统一内存，总 119 GiB）",
+  "context_tokens": 2048,
+  "output_tokens": 256,
+  "sampling": "greedy(temperature=0), ignore_eos=true, enable_thinking=false",
+  "measured_at": "2026-09-13T09:13:01.347012",
+  "filler_tokens": 1973,
+  "templated_prompt_tokens": 2048,
+  "measurements": [
+    {
+      "batch": 1,
+      "prefill_ms_median": 439.1,
+      "decode_ms_median": 57638.0,
+      "decode_ms_p90": 58121.9,
+      "tokens_per_sec": 4.44,
+      "raw_decode_ms": [
+        58102.7,
+        58121.9,
+        57638.0,
+        57442.1,
+        57573.0
+      ],
+      "raw_prefill_ms": [
+        432.9,
+        447.0,
+        440.1,
+        434.1,
+        439.1
+      ],
+      "output_tokens_per_request": 256,
+      "wall_ms": [
+        58535.8,
+        58569.1,
+        58078.4,
+        57876.5,
+        58012.4
+      ]
+    },
+    {
+      "batch": 2,
+      "prefill_ms_median": 689.7,
+      "decode_ms_median": 59841.2,
+      "decode_ms_p90": 60832.2,
+      "tokens_per_sec": 4.28,
+      "raw_decode_ms": [
+        59459.4,
+        59418.0,
+        59841.2,
+        60832.2,
+        60297.5
+      ],
+      "raw_prefill_ms": [
+        683.0,
+        1111.9,
+        689.7,
+        690.8,
+        684.0
+      ],
+      "output_tokens_per_request": 256,
+      "wall_ms": [
+        60185.1,
+        60574.5,
+        60579.0,
+        61569.4,
+        61029.7
+      ]
+    },
+    {
+      "batch": 4,
+      "prefill_ms_median": 1569.2,
+      "decode_ms_median": 60766.7,
+      "decode_ms_p90": 60780.1,
+      "tokens_per_sec": 4.21,
+      "raw_decode_ms": [
+        60736.4,
+        60772.5,
+        60755.4,
+        60780.1,
+        60766.7
+      ],
+      "raw_prefill_ms": [
+        1569.2,
+        1562.6,
+        1568.1,
+        1571.0,
+        1571.9
+      ],
+      "output_tokens_per_request": 256,
+      "wall_ms": [
+        61868.2,
+        61899.4,
+        61885.5,
+        61914.9,
+        61900.3
+      ]
+    },
+    {
+      "batch": 8,
+      "prefill_ms_median": 2446.4,
+      "decode_ms_median": 63651.2,
+      "decode_ms_p90": 64938.4,
+      "tokens_per_sec": 4.02,
+      "raw_decode_ms": [
+        64938.4,
+        63663.9,
+        63651.2,
+        63624.1,
+        63579.9
+      ],
+      "raw_prefill_ms": [
+        2430.3,
+        2447.8,
+        2440.5,
+        2446.4,
+        2453.3
+      ],
+      "output_tokens_per_request": 256,
+      "wall_ms": [
+        66477.8,
+        65197.0,
+        65189.6,
+        65161.4,
+        65127.0
+      ]
+    },
+    {
+      "batch": 16,
+      "prefill_ms_median": 4128.3,
+      "decode_ms_median": 69504.7,
+      "decode_ms_p90": 69805.7,
+      "tokens_per_sec": 3.68,
+      "raw_decode_ms": [
+        69412.5,
+        69805.7,
+        69511.0,
+        69482.5,
+        69504.7
+      ],
+      "raw_prefill_ms": [
+        4121.5,
+        4509.6,
+        4114.6,
+        4128.3,
+        4136.2
+      ],
+      "output_tokens_per_request": 256,
+      "wall_ms": [
+        71462.6,
+        71854.1,
+        71532.4,
+        71524.0,
+        71561.1
+      ]
+    }
+  ],
+  "ratio_batch10_over_batch1": {
+    "interpolated_decode_ms_batch10": 65535.6,
+    "interpolation": "log2 尺度，由 batch=8 与 batch=16 插值（batch=10 未直测，D2）",
+    "ratio": 1.137,
+    "ratio_batch8": 1.1043,
+    "ratio_batch16": 1.2059,
+    "decode_ms_batch1": 57638.0
+  }
+}

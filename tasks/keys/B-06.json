@@ -1,0 +1,52 @@
+{
+  "task_id": "B-06",
+  "chain_length": 4,
+  "steps": [
+    {
+      "step": 1,
+      "outputs": {
+        "L1": 0.88,
+        "P1": 545.6
+      },
+      "uses_previous": []
+    },
+    {
+      "step": 2,
+      "outputs": {
+        "K2": 0.035,
+        "dT2": 19.1,
+        "T2": 41.1
+      },
+      "uses_previous": [
+        "P1"
+      ]
+    },
+    {
+      "step": 3,
+      "outputs": {
+        "F3": 0.9465,
+        "P3": 516.41
+      },
+      "uses_previous": [
+        "P1",
+        "T2"
+      ]
+    },
+    {
+      "step": 4,
+      "outputs": {
+        "eta4": 0.9134,
+        "P4": 471.69,
+        "T4": 45.82
+      },
+      "uses_previous": [
+        "P3",
+        "T2"
+      ]
+    }
+  ],
+  "final": {
+    "P4": 471.69,
+    "T4": 45.82
+  }
+}
