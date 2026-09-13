@@ -1,3 +1,6 @@
+> **The idea is the human's. The work and the knowledge are the AI's.**
+> 点子是人的，工作和知识是 AI 做的。
+
 # selfbatch-for-local-llm
 
 > One request can't fill a GPU. On a local model there is no one else to fill
