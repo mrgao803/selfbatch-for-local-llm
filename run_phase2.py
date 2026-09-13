@@ -61,8 +61,18 @@ def main():
                           sink)
         print(f"[run] {len(tasks)} 题 × {len(cfg.seeds)} seed × {len(cfg.variants)} 变体 "
               f"× {cfg.rounds} 轮  endpoint={args.endpoint} mock={cfg.mock}", flush=True)
+        failures = []
         for t in tasks:
-            r.run_task(t)
+            try:
+                r.run_task(t)
+            except Exception as e:
+                # 逐题隔离：一题失败不牵连其余。如实记录，不重试、不改提示词。
+                failures.append((t.task_id, repr(e)[:300]))
+                print(f"[FAIL] {t.task_id}: {e!r}", flush=True)
+        if failures:
+            print(f"[run] {len(failures)} 题失败（如实记录，未重试未修改提示词）：", flush=True)
+            for tid, err in failures:
+                print(f"  {tid}: {err}", flush=True)
         print("[run] 生成阶段结束", flush=True)
 
     mapping = anonymize.build_pairs(tasks, cfg.seeds, cfg.variants, cfg.rounds)

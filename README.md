@@ -20,8 +20,17 @@ Measured on a single NVIDIA GB10 (27B bf16, 2048-token context):
 
 | | |
 |---|---|
-| Aggregate decode throughput at N=64 | **34×** vs a single stream |
-| End-to-end, real document, N=10, k=2 | **~2.9×** |
+| Aggregate decode throughput at N=64 | **34×** vs a single stream *(measured)* |
+| End-to-end, real document | **not yet demonstrated** — see below |
+
+**An honest caveat.** The parallel decode win is real and measured. But the first
+real end-to-end run came out **5.1× slower**, not faster. With the model's
+reasoning left on, one alignment round deliberates ~4,800 characters to revise
+~300, so **a single fusion round costs more than writing the whole document once**
+(769 s vs 442 s). Whether the end-to-end win survives depends entirely on making
+that round cheap — turn reasoning off, or train the rewrite to be a minimal edit.
+
+**That is the open question — not the parallelism.**
 
 ---
 
@@ -107,10 +116,14 @@ else's request is present); this eats the troughs (when nobody else is).
 
 ## Status
 
-- **Speed side: measured.** Full batch curve 1→64, plus a real end-to-end run.
-- **Quality side: not yet verified.** Whether segmented output matches
-  single-pass quality — and how many alignment rounds `k` actually needs
-  zero-shot — is the next milestone.
+- **The parallel decode speedup is measured.** Full batch curve 1→64 on one GPU:
+  34× aggregate throughput at N=64, at 1.88× the per-step cost.
+- **The end-to-end win is not demonstrated yet.** The first real run came out
+  slower, and the reason is now identified — the alignment round, not the
+  parallelism (see the caveat above).
+- **Quality is unverified.** Whether segmented output matches single-pass
+  quality, and how many alignment rounds `k` needs zero-shot, is the next
+  milestone.
 
 ## Repository layout
 
